@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time    : 7/17/2018 4:43 PM
+# @Time    : 7/20/2018 2:30 PM
 # @Author  : SkullFang
 # @Contact : yzhang.private@gmail.com
-# @File    : basemodel.py
+# @File    : bagging.py
 # @Software: PyCharm
 import sklearn.preprocessing as preprocessing
 import pandas as pd
 import numpy as np
 from sklearn import linear_model
+from sklearn.ensemble import BaggingRegressor
 #data processing
 #miss age
 titanic_data=pd.read_csv("./data/train.csv")
@@ -75,8 +76,8 @@ print(train_data.shape)
 y_label=train_data[:,0]
 X=train_data[:,1:]
 clf=linear_model.LogisticRegression(C=0.1,penalty='l1',tol=1e-6)
-clf.fit(X,y_label)
-print(clf)
+bagging_clf = BaggingRegressor(clf, n_estimators=20, max_samples=0.8, max_features=1.0, bootstrap=True, bootstrap_features=False, n_jobs=-1)
+bagging_clf.fit(X, y_label)
 
 
 
@@ -87,9 +88,9 @@ test_data['Age_scaled'] = scaler.fit_transform(test_data['Age'].values.reshape(-
 test_data['Fare_scaled'] = scaler.fit_transform(test_data['Fare'].values.reshape(-1, 1), fare_scale_param)
 test=drop_no_need(test_data).values
 print(test.shape)
-predictions=clf.predict(test)
+predictions=bagging_clf.predict(test)
 result=pd.DataFrame({'PassengerId':test_data['PassengerId'].values,
                      'Survived':predictions.astype(np.int32)})
-result.to_csv('./result/base_result.csv',index=False)
+result.to_csv('./result/baggingmodel.csv',index=False)
 
 # print(X[:,0])
